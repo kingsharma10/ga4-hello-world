@@ -1,0 +1,25 @@
+{
+  "name": "ga4-hello-world",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "live-server --port=3000",
+    "start": "npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kingsharma10/ga4-hello-world.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kingsharma10/ga4-hello-world/issues"
+  },
+  "homepage": "https://github.com/kingsharma10/ga4-hello-world#readme",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

@@ -33,5 +33,32 @@
       If you’re reading this on the public URL, GA4 should already be tracking
       you.
     </p>
+    <img
+      id="promoImg"
+      class="hero-img"
+      src="public/pic.jpeg"
+      alt="Promotional picture"
+    />
+    <!-- Contact Me button -->
+    <a id="contactBtn" href="mailto:you@example.com" class="contact-btn" style="padding-top: 10px;">
+      Contact Me
+    </a>
+
+    <script>
+      document.getElementById("contactBtn").addEventListener("click", () => {
+        gtag("event", "contact_me_click", { method: "mailto" });
+      });
+
+      document
+        .getElementById("promoImg")
+        .addEventListener("click", () =>
+          gtag("event", "image_click", { image_name: "pic.jpeg" })
+        );
+      document
+        .getElementById("promoImg")
+        .addEventListener("load", () =>
+          gtag("event", "image_view", { image_name: "pic.jpeg" })
+        );
+    </script>
   </body>
 </html>
