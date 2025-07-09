@@ -1,64 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Hello GA4</title>
+<head>
+  <meta charset="utf-8" />
+  <title>Hello GA4 + Tic Tac Toe</title>
 
-    <!-- Google tag (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-93EMYEPRX1"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-93EMYEPRX1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-93EMYEPRX1');
+  </script>
 
-      gtag("config", "G-93EMYEPRX1");
-    </script>
+  <style>
+    body { font-family:sans-serif; text-align:center; margin-top:3rem; }
+    .contact-btn { display:inline-block; margin-top:1rem; padding:.5rem 1rem;
+                   background:#0070f3; color:#fff; border-radius:.4rem;
+                   text-decoration:none; font-weight:600; }
+    .contact-btn:hover { background:#0059c1; }
 
-    <style>
-      body {
-        font-family: sans-serif;
-        text-align: center;
-        margin-top: 20vh;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Hello, world! 👋</h1>
-    <p>
-      If you’re reading this on the public URL, GA4 should already be tracking
-      you.
-    </p>
-    <img
-      id="promoImg"
-      class="hero-img"
-      src="public/pic.jpeg"
-      alt="Promotional picture"
-    />
-    <!-- Contact Me button -->
-    <a id="contactBtn" href="mailto:you@example.com" class="contact-btn" style="padding-top: 10px;">
-      Contact Me
-    </a>
+    /* Tic-Tac-Toe board */
+    #board { display:grid; grid-template-columns:repeat(3,100px);
+             gap:6px; justify-content:center; margin:2rem auto 1rem; }
+    .cell { width:100px; height:100px; font-size:2.5rem; font-weight:700;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; background:#fafafa; border:2px solid #ccc; }
+    .cell:hover { background:#f0f0f0; }
+    #status { margin:0.5rem 0 1.5rem; font-weight:600; }
+  </style>
+</head>
+<body>
+  <h1>Hello, world! 👋</h1>
+  <p>If you’re reading this on the public URL, GA4 should already be tracking you.</p>
 
-    <script>
-      document.getElementById("contactBtn").addEventListener("click", () => {
-        gtag("event", "contact_me_click", { method: "mailto" });
+  <!-- Image -->
+  <img id="promoImg" src="public/pic.jpeg" alt="Promotional picture" style="max-width:300px;width:80%;margin-top:1rem;cursor:pointer;"/>
+
+  <!-- Contact button -->
+  <a id="contactBtn" href="mailto:you@example.com" class="contact-btn">Contact Me</a>
+
+  <!-- Tic-Tac-Toe -->
+  <h2 style="margin-top:3rem;">Tic Tac Toe</h2>
+  <div id="board"></div>
+  <div id="status">Your turn! Click a square.</div>
+
+  <script>
+    /* ---------- Existing GA4 custom events ---------- */
+    document.getElementById('contactBtn').addEventListener('click', () =>
+      gtag('event', 'contact_me_click', {method: 'mailto'})
+    );
+    const img = document.getElementById('promoImg');
+    img.addEventListener('click', () =>
+      gtag('event', 'image_click', {image_name:'pic.jpeg'})
+    );
+    img.addEventListener('load', () =>
+      gtag('event', 'image_view', {image_name:'pic.jpeg'})
+    );
+
+    /* ---------- Session-time tracking ---------- */
+    const sessionStart = Date.now();
+    const sendSessionDuration = () => {
+      gtag('event', 'page_session', {
+        session_duration_sec: Math.round((Date.now() - sessionStart)/1000)
       });
+    };
+    window.addEventListener('beforeunload', sendSessionDuration);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState==='hidden') sendSessionDuration();
+    });
 
-      document
-        .getElementById("promoImg")
-        .addEventListener("click", () =>
-          gtag("event", "image_click", { image_name: "pic.jpeg" })
-        );
-      document
-        .getElementById("promoImg")
-        .addEventListener("load", () =>
-          gtag("event", "image_view", { image_name: "pic.jpeg" })
-        );
-    </script>
-  </body>
+    /* ---------- Tic-Tac-Toe game ---------- */
+    const boardEl = document.getElementById('board');
+    const statusEl = document.getElementById('status');
+    let board, gameOver;
+
+    function initBoard() {
+      board = Array(9).fill('');
+      gameOver = false;
+      boardEl.innerHTML = '';
+      statusEl.textContent = 'Your turn! Click a square.';
+      board.forEach((_, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.idx = i;
+        cell.addEventListener('click', playerMove, {once:true});
+        boardEl.appendChild(cell);
+      });
+    }
+
+    function playerMove(e) {
+      if (gameOver) return;
+      const idx = +e.target.dataset.idx;
+      board[idx] = 'X';
+      e.target.textContent = 'X';
+      if (checkEnd('X')) return;
+      computerMove();
+    }
+
+    function computerMove() {
+      const empty = board.map((v,i)=>v===''?i:null).filter(v=>v!==null);
+      if (empty.length===0) return;
+      const idx = empty[Math.floor(Math.random()*empty.length)];
+      board[idx]='O';
+      const cell = boardEl.querySelector(`[data-idx="${idx}"]`);
+      cell.textContent='O';
+      cell.removeEventListener('click', playerMove);
+      checkEnd('O');
+    }
+
+    function checkEnd(mark) {
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      const hasWon = wins.some(c => c.every(i=>board[i]===mark));
+      if (hasWon) {
+        finishGame(mark==='X' ? 'win' : 'loss');
+        return true;
+      }
+      if (!board.includes('')) {
+        finishGame('draw');
+        return true;
+      }
+      return false;
+    }
+
+    function finishGame(result) {
+      gameOver = true;
+      statusEl.textContent =
+        result==='draw' ? 'It’s a draw! Click any square to play again.' :
+        result==='win'  ? 'You win! 🎉 Click any square to play again.' :
+                          'You lose! 😢 Click any square to play again.';
+      /* GA4 win/loss record */
+      gtag('event', 'tictactoe_result', {result});
+      /* allow restart */
+      Array.from(boardEl.children).forEach(cell =>
+        cell.addEventListener('click', () => initBoard(), {once:true})
+      );
+    }
+
+    initBoard();
+  </script>
+</body>
 </html>
